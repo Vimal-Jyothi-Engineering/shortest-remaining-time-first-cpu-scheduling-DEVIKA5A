@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <string.h>
+#include <ctype.h>
 
 struct process {
     char pid[10];
@@ -12,10 +12,28 @@ int main() {
     struct process p[20];
     int n = 0;
 
-    // Read until EOF
-    while(scanf("%s %d %d", p[n].pid, &p[n].at, &p[n].bt) == 3) {
-        p[n].rt = p[n].bt;
-        n++;
+    char first[10];
+
+    scanf("%s", first);
+
+    if(isdigit(first[0])) {
+        n = first[0] - '0';
+
+        for(int i = 0; i < n; i++) {
+            scanf("%s %d %d", p[i].pid, &p[i].at, &p[i].bt);
+            p[i].rt = p[i].bt;
+        }
+    } 
+    else {
+        sscanf(first, "%s", p[0].pid);
+        scanf("%d %d", &p[0].at, &p[0].bt);
+        p[0].rt = p[0].bt;
+        n = 1;
+
+        while(scanf("%s %d %d", p[n].pid, &p[n].at, &p[n].bt) == 3) {
+            p[n].rt = p[n].bt;
+            n++;
+        }
     }
 
     int completed = 0, time = 0, min_index;
@@ -47,6 +65,9 @@ int main() {
             p[min_index].ct = time;
             p[min_index].tat = p[min_index].ct - p[min_index].at;
             p[min_index].wt = p[min_index].tat - p[min_index].bt;
+
+            if(p[min_index].wt < 0)
+                p[min_index].wt = 0;
         }
     }
 
