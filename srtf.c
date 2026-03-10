@@ -17,7 +17,7 @@ int main() {
         p[i].rt = p[i].bt;
     }
 
-    int completed = 0, time = 0, min_index = -1;
+    int completed = 0, time = 0, min_index;
     int min_rt;
 
     while(completed < n) {
@@ -46,9 +46,6 @@ int main() {
             p[min_index].ct = time;
             p[min_index].tat = p[min_index].ct - p[min_index].at;
             p[min_index].wt = p[min_index].tat - p[min_index].bt;
-
-            if(p[min_index].wt < 0)
-                p[min_index].wt = 0;
         }
     }
 
