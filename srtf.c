@@ -1,95 +1,81 @@
 #include <stdio.h>
-#include <limits.h>
+#include <string.h>
 
 struct process {
     char pid[10];
     int at, bt, rt;
     int ct, wt, tat;
+    int done;
 };
 
 int main() {
     int n;
     scanf("%d", &n);
-    
+
     struct process p[20];
-    
-    for(int i = 0; i < n; i++) {
+
+    for (int i = 0; i < n; i++) {
         scanf("%s %d %d", p[i].pid, &p[i].at, &p[i].bt);
         p[i].rt = p[i].bt;
+        p[i].done = 0;
     }
-    
+
     int completed = 0;
-    int current_time = 0;
-    int total_wt = 0, total_tat = 0;
-    int min_rt_index;
-    int shortest = -1;
-    
-    // Array to track if process is completed
-    int is_completed[20] = {0};
-    
-    while(completed < n) {
-        // Find process with minimum remaining time among arrived processes
-        shortest = -1;
-        int min_rt = INT_MAX;
-        
-        for(int i = 0; i < n; i++) {
-            if(p[i].at <= current_time && !is_completed[i]) {
-                if(p[i].rt < min_rt) {
-                    min_rt = p[i].rt;
-                    shortest = i;
-                }
-                // If remaining time is same, choose the one that arrived earlier
-                else if(p[i].rt == min_rt && p[i].at < p[shortest].at) {
-                    shortest = i;
-                }
+    int time = 0;
+
+    // Start time from the earliest arrival
+    int min_at = p[0].at;
+    for (int i = 1; i < n; i++)
+        if (p[i].at < min_at) min_at = p[i].at;
+    time = min_at;
+
+    while (completed < n) {
+        // Find process with smallest remaining time that has arrived
+        int idx = -1;
+        int min_rt = 99999;
+
+        for (int i = 0; i < n; i++) {
+            if (!p[i].done && p[i].at <= time && p[i].rt < min_rt) {
+                min_rt = p[i].rt;
+                idx = i;
             }
         }
-        
-        if(shortest == -1) {
-            // If no process has arrived yet, increment time
-            current_time++;
+
+        if (idx == -1) {
+            // CPU idle — no process has arrived yet
+            time++;
             continue;
         }
-        
-        // Execute the selected process for 1 time unit
-        p[shortest].rt--;
-        current_time++;
-        
-        // If process is completed
-        if(p[shortest].rt == 0) {
+
+        // Execute for 1 time unit
+        p[idx].rt--;
+        time++;
+
+        if (p[idx].rt == 0) {
+            p[idx].ct = time;
+            p[idx].tat = p[idx].ct - p[idx].at;
+            p[idx].wt = p[idx].tat - p[idx].bt;
+            p[idx].done = 1;
             completed++;
-            is_completed[shortest] = 1;
-            
-            // Calculate completion time
-            p[shortest].ct = current_time;
-            
-            // Calculate turnaround time
-            p[shortest].tat = p[shortest].ct - p[shortest].at;
-            
-            // Calculate waiting time
-            p[shortest].wt = p[shortest].tat - p[shortest].bt;
-            
-            // Add to totals
-            total_wt += p[shortest].wt;
-            total_tat += p[shortest].tat;
         }
     }
-    
-    // Print Waiting Time
+
+    float avg_wt = 0, avg_tat = 0;
+    for (int i = 0; i < n; i++) {
+        avg_wt += p[i].wt;
+        avg_tat += p[i].tat;
+    }
+
     printf("Waiting Time:\n");
-    for(int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
         printf("%s %d\n", p[i].pid, p[i].wt);
-    }
-    
-    // Print Turnaround Time
+
     printf("Turnaround Time:\n");
-    for(int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
         printf("%s %d\n", p[i].pid, p[i].tat);
-    }
-    
-    // Print Averages
-    printf("Average Waiting Time: %.1f\n", (float)total_wt/n);
-    printf("Average Turnaround Time: %.1f\n", (float)total_tat/n);
-    
+
+    printf("Average Waiting Time: %.1f\n", avg_wt / n);
+    printf("Average Turnaround Time: %.1f\n", avg_tat / n);
+
     return 0;
 }
