@@ -1,4 +1,5 @@
-##include <stdio.h>
+#include <stdio.h>
+#include <string.h>
 
 struct process {
     char pid[10];
@@ -7,20 +8,21 @@ struct process {
 };
 
 int main() {
-    int n;
-    scanf("%d", &n);
 
     struct process p[20];
+    int n = 0;
 
-    for(int i = 0; i < n; i++) {
-        scanf("%s %d %d", p[i].pid, &p[i].at, &p[i].bt);
-        p[i].rt = p[i].bt;
+    // Read until EOF
+    while(scanf("%s %d %d", p[n].pid, &p[n].at, &p[n].bt) == 3) {
+        p[n].rt = p[n].bt;
+        n++;
     }
 
-    int completed = 0, time = 0, min_index = -1;
+    int completed = 0, time = 0, min_index;
     int min_rt;
 
     while(completed < n) {
+
         min_rt = 9999;
         min_index = -1;
 
@@ -41,12 +43,10 @@ int main() {
 
         if(p[min_index].rt == 0) {
             completed++;
+
             p[min_index].ct = time;
             p[min_index].tat = p[min_index].ct - p[min_index].at;
             p[min_index].wt = p[min_index].tat - p[min_index].bt;
-
-            if(p[min_index].wt < 0)
-                p[min_index].wt = 0;
         }
     }
 
@@ -64,8 +64,8 @@ int main() {
         avg_tat += p[i].tat;
     }
 
-    printf("Average Waiting Time: %.1f\n", avg_wt / n);
-    printf("Average Turnaround Time: %.1f\n", avg_tat / n);
+    printf("Average Waiting Time: %.1f\n", avg_wt/n);
+    printf("Average Turnaround Time: %.1f\n", avg_tat/n);
 
     return 0;
 }
